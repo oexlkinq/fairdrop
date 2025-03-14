@@ -49,7 +49,7 @@ func (db *DB) CreateFolder(c context.Context, pw string, ip string) *Folder {
 
 	_, err := db.NamedExecContext(c, "INSERT INTO folders VALUES (:password, :creation_date, :ip)", folder)
 	if err != nil {
-		panic(fmt.Errorf("create folder: %w", err))
+		panic(err)
 	}
 
 	return folder
@@ -64,8 +64,22 @@ func (db *DB) TestFolder(c context.Context, pw string) bool {
 			return false
 		}
 
-		panic(fmt.Errorf("test folder: %w", err))
+		panic(err)
 	}
 
 	return true
+}
+
+func (db *DB) DeleteFolder(c context.Context, pw string) bool {
+	res, err := db.ExecContext(c, "DELETE FROM folders WHERE password = $1", pw)
+	if err != nil {
+		panic(err)
+	}
+
+	rowsAff, err := res.RowsAffected()
+	if err != nil {
+		panic(err)
+	}
+
+	return rowsAff > 0
 }

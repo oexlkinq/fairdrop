@@ -15,6 +15,7 @@ type Config struct {
 func Populate() Config {
 	godotenv.Load()
 
+	// #3 TODO: чекать, существует ли, хотябы пустая, переменная в энве
 	return Config{
 		DBFile:         os.Getenv("DB_FILE"),
 		PublicBasePath: os.Getenv("PUBLIC_BASE_PATH"),

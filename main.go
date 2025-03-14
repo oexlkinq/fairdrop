@@ -13,6 +13,6 @@ func main() {
 	db := db.Connect(config.DBFile)
 	s := storage.Create(config.StoragePath)
 
-	routes := routes.Create(db, s)
+	routes := routes.Create(db, s, config.PublicBasePath)
 	routes.Run()
 }

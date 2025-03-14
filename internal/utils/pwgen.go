@@ -1,12 +1,31 @@
 package utils
 
 import (
-	"fmt"
 	"math/rand/v2"
+	"strings"
 )
 
+var dicts = []string{"аоуыэяюие", "бвгджзклмнпрстфхцчшщ"}
+
+const letterSize = 2
+const pwLength = 6
+const pwSize = pwLength * letterSize
+
 func GeneratePassword() string {
-	// TODO: реализовать генерацию пароля
-	// TODO: реализовать проверку уникальности пароля по базе перед возвратом
-	return fmt.Sprintf("pw%d", rand.Int()%10000)
+	var pw strings.Builder
+	pw.Grow(pwSize)
+
+	for i := 0; i < pwLength; i++ {
+		// побитовое И вернёт всегда либо 0 либо 1. больше не нужно, т.к. словаря 2
+		dictI := i & 1
+		dict := dicts[dictI]
+
+		dictLetterI := rand.IntN(len(dict) >> 1)
+		dictByteI := dictLetterI << 1
+
+		pw.WriteByte(dict[dictByteI])
+		pw.WriteByte(dict[dictByteI+1])
+	}
+
+	return pw.String()
 }
