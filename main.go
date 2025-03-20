@@ -1,29 +1,18 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/oexlkinq/fairdrop/internal/config"
+	"github.com/oexlkinq/fairdrop/internal/db"
+	"github.com/oexlkinq/fairdrop/internal/routes"
+	"github.com/oexlkinq/fairdrop/internal/storage"
 )
 
-type App struct {
-	db *DB
-}
-
 func main() {
-	config := Populate()
+	config := config.Populate()
 
-	app := App{
-		db: Connect(config.DBFile),
-	}
+	db := db.Connect(config.DBFile)
+	s := storage.Create(config.StoragePath)
 
-	r := gin.Default()
-	app.AddFolderRoutes(&r.RouterGroup)
-	r.Run()
-
-	// r := gin.Default()
-	// r.GET("/ping", func(c *gin.Context) {
-	// 	c.JSON(200, gin.H{
-	// 		"message": "pong",
-	// 	})
-	// })
-	// r.Run() // listen and serve on 0.0.0.0:8080
+	routes := routes.Create(db, s)
+	routes.Run()
 }
