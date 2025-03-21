@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 type Storage struct {
@@ -18,14 +19,14 @@ func Create(path string) *Storage {
 }
 
 func (s *Storage) CreateFolder(password string) {
-	err := os.Mkdir(path.Join(s.path, password), 0700)
+	err := os.Mkdir(filepath.Join(s.path, password), 0700)
 	if err != nil {
 		panic(fmt.Errorf("create folder mkdir: %w", err))
 	}
 }
 
 func (s *Storage) ListFolder(password string) *Folder {
-	dir, err := os.ReadDir(path.Join(s.path, password))
+	dir, err := os.ReadDir(filepath.Join(s.path, password))
 	if err != nil {
 		panic(fmt.Errorf("list folder: %w", err))
 	}
@@ -36,4 +37,10 @@ func (s *Storage) ListFolder(password string) *Folder {
 	}
 
 	return &folder
+}
+
+func (s *Storage) GetFilepath(password string, filename string) string {
+	fullname := filepath.Join(s.path, password, filepath.FromSlash(path.Clean("/"+filename)))
+
+	return fullname
 }
