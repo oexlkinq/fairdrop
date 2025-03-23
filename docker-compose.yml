@@ -1,0 +1,11 @@
+services:
+  fairdrop:
+    container_name: fairdrop
+    build: .
+    environment:
+      DATA_FOLDER_PATH: /data
+      PORT: 8080
+    ports:
+      - ${PORT}:8080
+    volumes:
+      - ${DATA_FOLDER_PATH}:/data

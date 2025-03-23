@@ -2,10 +2,13 @@ package storage
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
 )
+
+const storageFolderName = "storage"
 
 type Storage struct {
 	Path string
@@ -13,9 +16,30 @@ type Storage struct {
 
 type Folder []string
 
-func Create(path string) *Storage {
-	// #3 TODO: можно чекать, существует и доступна ли для записи папка storage
-	return &Storage{path}
+func Create(dataFolderPath string) *Storage {
+	storagePath := path.Join(dataFolderPath, storageFolderName)
+
+	// проверка на существование и создание storage
+	testfilePath := path.Join(storagePath, "perm.test")
+	file, err := os.Create(testfilePath)
+	if err != nil {
+		log.Println(fmt.Errorf("cant create perm.test file in storage folder: %w", err))
+
+		log.Println("trying to create storage folder")
+
+		err = os.Mkdir(storagePath, 0700)
+		if err != nil {
+			log.Fatal(fmt.Errorf("cant create storage folder: %w", err))
+		}
+		log.Println("storage folder created")
+	}
+	file.Close()
+	err = os.Remove(testfilePath)
+	if err != nil {
+		panic(err)
+	}
+
+	return &Storage{storagePath}
 }
 
 func (s *Storage) CreateFolder(password string) {

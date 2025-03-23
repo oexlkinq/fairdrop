@@ -7,13 +7,12 @@ import (
 )
 
 type App struct {
-	db       *db.DB
-	storage  *storage.Storage
-	basePath string
+	db      *db.DB
+	storage *storage.Storage
 }
 
-func Create(db *db.DB, s *storage.Storage, base string) *App {
-	return &App{db, s, base}
+func Create(db *db.DB, s *storage.Storage) *App {
+	return &App{db, s}
 }
 
 func (app *App) Run() {

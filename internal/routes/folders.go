@@ -60,9 +60,6 @@ func (app *App) listFolder(c *gin.Context) {
 	}
 
 	files := app.storage.ListFolder(pw)
-	for i, filename := range *files {
-		(*files)[i] = path.Join(app.basePath, filename)
-	}
 
 	c.JSON(http.StatusOK, files)
 }

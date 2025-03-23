@@ -10,9 +10,9 @@ import (
 func main() {
 	config := config.Populate()
 
-	db := db.Connect(config.DBFile)
-	s := storage.Create(config.StoragePath)
+	db := db.Connect(config.DataFolderPath)
+	s := storage.Create(config.DataFolderPath)
 
-	routes := routes.Create(db, s, config.PublicBasePath)
+	routes := routes.Create(db, s)
 	routes.Run()
 }

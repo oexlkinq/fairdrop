@@ -7,9 +7,7 @@ import (
 )
 
 type Config struct {
-	DBFile         string
-	PublicBasePath string
-	StoragePath    string
+	DataFolderPath string
 }
 
 func Populate() Config {
@@ -17,8 +15,6 @@ func Populate() Config {
 
 	// #3 TODO: чекать, существует ли, хотябы пустая, переменная в энве
 	return Config{
-		DBFile:         os.Getenv("DB_FILE"),
-		PublicBasePath: os.Getenv("PUBLIC_BASE_PATH"),
-		StoragePath:    os.Getenv("STORAGE_PATH"),
+		DataFolderPath: os.Getenv("DATA_FOLDER_PATH"),
 	}
 }

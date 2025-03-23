@@ -6,13 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"path"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var schema = `
+const dbFilename = "db.sqlite3"
+
+const schema = `
 CREATE TABLE IF NOT EXISTS folders (
 	password TEXT,
 	creation_date INT DEFAULT CURRENT_TIMESTAMP,
@@ -29,8 +32,8 @@ type Folder struct {
 	Ip           string `db:"ip" json:"ip"`
 }
 
-func Connect(DBFile string) *DB {
-	db, err := sqlx.Connect("sqlite3", DBFile)
+func Connect(dataFolderPath string) *DB {
+	db, err := sqlx.Connect("sqlite3", path.Join(dataFolderPath, dbFilename))
 	if err != nil {
 		log.Fatalln(fmt.Errorf("connect to sqlite db: %w", err))
 	}
