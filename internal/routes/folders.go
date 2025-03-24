@@ -99,21 +99,20 @@ func (app *App) uploadFile(c *gin.Context) {
 	}
 
 	if !app.db.TestFolder(c, params.Password) {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
 	err = c.Request.ParseMultipartForm(maxBunchFilesUploadSize)
 	if err != nil {
 		log.Println(fmt.Errorf("upload file: parse multipart form: %w", err))
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 
-	for filename, files := range c.Request.MultipartForm.File {
-		// #3 TODO: в files могут лежать несколько файлов с одинаковым name из формы. мб здесь стоит делать чтото большее чем просто отбрасывать их
-		file := files[0]
-		fullpath := filepath.Join(app.storage.Path, params.Password, path.Base(filename))
+	files := c.Request.MultipartForm.File["file"]
+	for _, file := range files {
+		fullpath := filepath.Join(app.storage.Path, params.Password, path.Base(file.Filename))
 
 		err := c.SaveUploadedFile(file, fullpath)
 		if err != nil {
@@ -132,7 +131,7 @@ func (app *App) deleteFolder(c *gin.Context) {
 	}
 
 	if !app.db.DeleteFolder(c, params.Password) {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 

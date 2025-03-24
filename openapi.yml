@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: fairdrop api
+  version: 1.0.0
+paths:
+  /create:
+    post:
+      summary: создать папку
+      description: создаёт новую папку и возвращает информацию о ней
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  password:
+                    $ref: '#/components/schemas/password'
+                  creation_date:
+                    type: integer
+                    format: int32
+                    description: timestamp в формате unix-time в секундах
+                  ip:
+                    type: string
+                    format: ipv4
+        "5XX":
+          description: внутренняя ошибка сервера
+  /{password}:
+    parameters:
+      - $ref: '#/components/parameters/pwParam'
+    get:
+      summary: получить список файлов папки
+      description: возвращает список из имен файлов содержащихся в папке
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '404':
+          description: папка не найдена
+        '5XX':
+          description: внутренняя ошибка сервера
+    post:
+      summary: загрузить файлы в папку
+      description: записывает файлы переданные в форме в указанную папку
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: запрошенная папка не существует
+        '413':
+          description: объем данных в форме превышает лимит
+        '5XX':
+          description: внутренняя ошибка сервера
+    delete:
+      summary: удалить папку
+      description: удаляет папку
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: запрошенная папка не существует
+        '5XX':
+          description: внутренняя ошибка сервера
+  /{password}/{filename}:
+    parameters:
+      - $ref: '#/components/parameters/pwParam'
+      - $ref: '#/components/parameters/filenameParam'
+    get:
+      summary: скачать файл
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: запрошенные файл или папка не найдены
+
+components:
+  parameters:
+    pwParam:
+      description: пароль-идентификатор папки
+      name: password
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/password'
+    filenameParam:
+      description: имя файла
+      name: filename
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/filename'
+  schemas:
+    password:
+      type: string
+      minLength: 6
+      maxLength: 6
+    filename:
+      type: string
+      minLength: 1
+      maxLength: 256
