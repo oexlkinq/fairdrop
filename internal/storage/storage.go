@@ -32,11 +32,12 @@ func Create(dataFolderPath string) *Storage {
 			log.Fatal(fmt.Errorf("cant create storage folder: %w", err))
 		}
 		log.Println("storage folder created")
-	}
-	file.Close()
-	err = os.Remove(testfilePath)
-	if err != nil {
-		panic(err)
+	} else {
+		file.Close()
+		err = os.Remove(testfilePath)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return &Storage{storagePath}

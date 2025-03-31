@@ -1,9 +1,11 @@
 openapi: 3.0.0
 info:
   title: fairdrop api
-  version: 1.0.0
+  version: 1.1.1
+servers:
+  - url: ./
 paths:
-  /create:
+  /folders/create:
     post:
       summary: создать папку
       description: создаёт новую папку и возвращает информацию о ней
@@ -14,6 +16,10 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - password
+                  - creation_date
+                  - ip
                 properties:
                   password:
                     $ref: '#/components/schemas/password'
@@ -26,7 +32,7 @@ paths:
                     format: ipv4
         "5XX":
           description: внутренняя ошибка сервера
-  /{password}:
+  /folders/{folder}:
     parameters:
       - $ref: '#/components/parameters/pwParam'
     get:
@@ -79,7 +85,7 @@ paths:
           description: запрошенная папка не существует
         '5XX':
           description: внутренняя ошибка сервера
-  /{password}/{filename}:
+  /folders/{folder}/{filename}:
     parameters:
       - $ref: '#/components/parameters/pwParam'
       - $ref: '#/components/parameters/filenameParam'
@@ -100,7 +106,7 @@ components:
   parameters:
     pwParam:
       description: пароль-идентификатор папки
-      name: password
+      name: folder
       in: path
       required: true
       schema:

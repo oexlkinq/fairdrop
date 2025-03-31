@@ -19,6 +19,11 @@ func (app *App) Run() {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 
+	r.Use(func(ctx *gin.Context) {
+		// #2 TODO: сменить * на домен или пару доменов
+		ctx.Header("Access-Control-Allow-Origin", "*")
+	})
+
 	folders := r.Group("/folders")
 	app.addFolderRoutes(folders)
 
