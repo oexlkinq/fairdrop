@@ -110,7 +110,7 @@ func (app *App) uploadFile(c *gin.Context) {
 		return
 	}
 
-	files := c.Request.MultipartForm.File["file"]
+	files := c.Request.MultipartForm.File["files"]
 	for _, file := range files {
 		fullpath := filepath.Join(app.storage.Path, params.Password, path.Base(file.Filename))
 
