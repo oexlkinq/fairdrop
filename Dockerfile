@@ -1,6 +1,21 @@
 # build stage
-FROM golang:alpine AS build-stage
+FROM node:alpine AS frontend-base
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+FROM frontend-base AS build-frontend
+WORKDIR /src
+
+COPY frontend/pnpm-lock.yaml .
+RUN pnpm fetch --prod
+
+COPY frontend .
+RUN pnpm run build
+
+
+FROM golang:alpine AS build-backend
 WORKDIR /src
 
 RUN apk add gcc musl-dev
@@ -9,22 +24,24 @@ RUN apk add gcc musl-dev
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
-RUN --mount=source=internal,dst=internal \
-    --mount=source=main.go,dst=main.go \
-    CGO_ENABLED=1 go build -v -o /fairdrop
+COPY --from=build-frontend /src/dist /src/frontend/dist
+COPY internal ./internal
+COPY main.go .
+COPY frontend/embed.go frontend
+
+RUN CGO_ENABLED=1 go build -v -o /fairdrop
 
 # #2 TODO: вернуть, когда появятся тесты
 # Run the tests in the container
-# FROM build-stage AS run-test-stage
+# FROM build-backend AS run-test-stage
 # RUN go test -v
 
 
 # build release stage
 FROM alpine AS build-release-stage
-
 WORKDIR /
 
-COPY --from=build-stage /fairdrop /fairdrop
+COPY --from=build-backend /fairdrop /fairdrop
 
 ENV GIN_MODE=release
 ENV PORT=8080
