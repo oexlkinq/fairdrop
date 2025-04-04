@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import api from '@/api';
-import type { AxiosProgressEvent } from 'axios';
-import { reactive, ref, useTemplateRef } from 'vue';
+import { ref, useTemplateRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 const maxFormSize = 33554432
 
@@ -11,7 +11,14 @@ const uploadState = ref({
   processing: false,
 })
 
-const { data: folder } = await api.foldersCreatePost()
+const route = useRoute('/upload/[[pw]]')
+let pw = route.params.pw ?? ''
+if (pw === '') {
+  const { data: folder } = await api.foldersCreatePost()
+
+  pw = folder.password
+  useRouter().replace('/upload/' + pw)
+}
 
 async function submit() {
   if (uploadState.value.processing) {
@@ -44,7 +51,7 @@ async function submit() {
       return alert('too big files')
     }
 
-    await api.foldersFolderPost(folder.password, fileArray, {
+    await api.foldersFolderPost(pw, fileArray, {
       onUploadProgress(progressEvent) {
         uploadState.value.progress = progressEvent.progress ?? 0
       },
@@ -58,26 +65,22 @@ async function submit() {
 </script>
 
 <template>
-  <main class="island">
-    <h3>{{ folder.password }}</h3>
-    <input type="date" :value="folder.creation_date" disabled>
-    <code>{{ folder.ip }}</code>
-    <form @submit.prevent="submit">
-      <input type="hidden" name="MAX_FILE_SIZE" :value="maxFormSize">
-      <input class="form-control" type="file" name="file" ref="files" multiple :disabled="uploadState.processing">
+  <h3>{{ pw }}</h3>
 
-      <input class="btn btn-primary w-100" type="submit" value="Загрузить" :disabled="uploadState.processing">
+  <form class="grid-vstack" @submit.prevent="submit">
+    <input type="hidden" name="MAX_FILE_SIZE" :value="maxFormSize">
+    <input class="form-control" type="file" name="file" ref="files" multiple :disabled="uploadState.processing">
 
-      <div class="progress" :aria-disabled="!uploadState.processing">
-        <div class="progress-bar" :style="{ width: `${uploadState.progress * 100}%` }"></div>
-      </div>
-    </form>
-  </main>
+    <input class="btn btn-primary w-100" type="submit" value="Загрузить" :disabled="uploadState.processing">
+
+    <div class="progress" :aria-disabled="!uploadState.processing">
+      <div class="progress-bar" :style="{ width: `${uploadState.progress * 100}%` }"></div>
+    </div>
+  </form>
 </template>
 
-<style scoped>
-form {
-  display: grid;
-  gap: 1rem;
-}
-</style>
+<route lang="json">{
+  "alias": [
+    "/upload/"
+  ]
+}</route>

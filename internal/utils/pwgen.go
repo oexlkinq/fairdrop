@@ -15,9 +15,10 @@ func GeneratePassword() string {
 	var pw strings.Builder
 	pw.Grow(pwSize)
 
+	dictIShift := rand.IntN(2)
 	for i := 0; i < pwLength; i++ {
 		// побитовое И вернёт всегда либо 0 либо 1. больше не нужно, т.к. словаря 2
-		dictI := i & 1
+		dictI := (i + dictIShift) & 1
 		dict := dicts[dictI]
 
 		dictLetterI := rand.IntN(len(dict) >> 1)

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 
-const route = useRoute('/[...path]')
+useRouter().push("/")
 </script>
-
-<template>404. route <span>"{{ route.params.path }}"</span> not found</template>
