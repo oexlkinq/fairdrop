@@ -1,12 +1,14 @@
-package utils
+package main
 
 import (
 	"math/rand/v2"
 	"strings"
 )
 
-var dicts = []string{"аоуыэяюие", "бвгджзклмнпрстфхцчшщ"}
+var dicts = []string{"аоуыэяюие", "бвгджзклмнпрстфхч"}
 
+// шанс на смену словаря увеличивается вплоть до 100% за указанное кол-во шагов
+const dictChangeEvery = 2
 const letterSize = 2
 const pwLength = 6
 const pwSize = pwLength * letterSize
@@ -15,17 +17,24 @@ func GeneratePassword() string {
 	var pw strings.Builder
 	pw.Grow(pwSize)
 
-	dictIShift := rand.IntN(2)
+	dictI := rand.IntN(len(dicts))
+	lastDictChange := 0
 	for i := 0; i < pwLength; i++ {
-		// побитовое И вернёт всегда либо 0 либо 1. больше не нужно, т.к. словаря 2
-		dictI := (i + dictIShift) & 1
+		dictI %= len(dicts)
 		dict := dicts[dictI]
 
-		dictLetterI := rand.IntN(len(dict) >> 1)
-		dictByteI := dictLetterI << 1
+		dictLetterI := rand.IntN(len(dict) / letterSize)
+		dictByteI := dictLetterI * letterSize
 
 		pw.WriteByte(dict[dictByteI])
 		pw.WriteByte(dict[dictByteI+1])
+
+		noDictChangeSteps := i - lastDictChange
+		dictChangeChance := dictChangeEvery - noDictChangeSteps
+		if dictChangeChance <= 0 || rand.IntN(dictChangeChance) == 0 {
+			dictI++
+			lastDictChange = i
+		}
 	}
 
 	return pw.String()
