@@ -1,5 +1,5 @@
 # build stage
-FROM node:latest AS frontend-base
+FROM node:slim AS frontend-base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -8,11 +8,9 @@ RUN corepack enable
 FROM frontend-base AS build-frontend
 WORKDIR /src
 
-COPY frontend/pnpm-lock.yaml .
-RUN pnpm fetch --prod
-
 COPY frontend .
-RUN pnpm run build
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm run build-only
 
 
 FROM golang:alpine AS build-backend
