@@ -1,33 +1,47 @@
-package main
+package utils
 
 import (
 	"math/rand/v2"
 	"strings"
 )
 
-var dicts = []string{"аоуыэяюие", "бвгджзклмнпрстфхч"}
+var dicts = [][]rune{[]rune("аоуыэяюие"), []rune("бвгджзклмнпрстфхч")}
 
 // шанс на смену словаря увеличивается вплоть до 100% за указанное кол-во шагов
-const dictChangeEvery = 2
-const letterSize = 2
+const dictChangeEvery = 3
 const pwLength = 6
-const pwSize = pwLength * letterSize
+const runeSize = 4
 
 func GeneratePassword() string {
 	var pw strings.Builder
-	pw.Grow(pwSize)
+	pw.Grow(pwLength * runeSize)
 
 	dictI := rand.IntN(len(dicts))
-	lastDictChange := 0
+	lastDictChange := -1
+	prevRune := struct {
+		runeI int
+		dictI int
+	}{-1, -1}
 	for i := 0; i < pwLength; i++ {
 		dictI %= len(dicts)
 		dict := dicts[dictI]
 
-		dictLetterI := rand.IntN(len(dict) / letterSize)
-		dictByteI := dictLetterI * letterSize
+		var runeI int
+		// исключение повтора рун
+		if prevRune.dictI == dictI {
+			runeI = rand.IntN(len(dict) - 1)
 
-		pw.WriteByte(dict[dictByteI])
-		pw.WriteByte(dict[dictByteI+1])
+			if runeI >= prevRune.runeI {
+				runeI++
+			}
+		} else {
+			runeI = rand.IntN(len(dict))
+		}
+
+		prevRune.dictI = dictI
+		prevRune.runeI = runeI
+
+		pw.WriteRune(dict[runeI])
 
 		noDictChangeSteps := i - lastDictChange
 		dictChangeChance := dictChangeEvery - noDictChangeSteps
