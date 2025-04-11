@@ -1,5 +1,5 @@
 # build stage
-FROM node:alpine AS frontend-base
+FROM node:latest AS frontend-base
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -29,7 +29,8 @@ COPY internal ./internal
 COPY main.go .
 COPY frontend/embed.go frontend
 
-RUN CGO_ENABLED=1 go build -v -o /fairdrop
+ENV GOCACHE=/gocache
+RUN --mount=type=cache,target="/gocache" CGO_ENABLED=1 go build -v -o /fairdrop
 
 # #2 TODO: вернуть, когда появятся тесты
 # Run the tests in the container
