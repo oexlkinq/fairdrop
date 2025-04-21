@@ -10,7 +10,9 @@ WORKDIR /src
 
 COPY frontend .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm run build-only
+
+ARG BASE_PATH="/"
+RUN pnpm run build-only --base ${BASE_PATH}
 
 
 FROM golang:alpine AS build-backend

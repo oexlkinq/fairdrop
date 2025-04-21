@@ -12,11 +12,16 @@ import (
 	"github.com/oexlkinq/fairdrop/frontend"
 )
 
-func makeServeFrontend() gin.HandlerFunc {
+func makeServeFrontend(basePath string) gin.HandlerFunc {
 	devFrURLString := os.Getenv("DEV_FRONTEND_URL")
 
 	if devFrURLString == "" {
-		return static.Serve("/", static.EmbedFolder(frontend.FrontendContentFS, "dist"))
+		fs, err := static.EmbedFolder(frontend.FrontendContentFS, "dist")
+		if err != nil {
+			panic(fmt.Errorf("make EmbedFolder: %w", err))
+		}
+
+		return static.Serve(basePath, fs)
 	} else {
 		log.Println("using proxy for frontend")
 

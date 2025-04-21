@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -9,12 +10,13 @@ import (
 )
 
 type App struct {
-	db      *db.DB
-	storage *storage.Storage
+	db       *db.DB
+	storage  *storage.Storage
+	basePath string
 }
 
-func Create(db *db.DB, s *storage.Storage) *App {
-	return &App{db, s}
+func Create(db *db.DB, s *storage.Storage, basePath string) *App {
+	return &App{db, s, basePath}
 }
 
 func (app *App) Run() {
@@ -26,16 +28,19 @@ func (app *App) Run() {
 		ctx.Header("Access-Control-Allow-Origin", "*")
 	})
 
-	serveFrontend := makeServeFrontend()
+	rootGroup := r.Group(app.basePath)
+
+	serveFrontend := makeServeFrontend(app.basePath)
+	apiPrefix := path.Join(app.basePath, "/folders/")
 	r.Use(func(ctx *gin.Context) {
-		if strings.HasPrefix(ctx.Request.URL.Path, "/folders/") {
+		if strings.HasPrefix(ctx.Request.URL.Path, apiPrefix) {
 			return
 		}
 
 		serveFrontend(ctx)
 	})
 
-	folders := r.Group("/folders")
+	folders := rootGroup.Group("/folders")
 	app.addFolderRoutes(folders)
 
 	r.Run()
