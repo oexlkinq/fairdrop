@@ -23,14 +23,18 @@ func (app *App) Run() {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 
+	// для CORS
 	r.Use(func(ctx *gin.Context) {
 		// #2 TODO: сменить * на домен или пару доменов
 		ctx.Header("Access-Control-Allow-Origin", "*")
 	})
 
+	serveFrontend := makeServeFrontend(app.basePath)
+	r.GET(app.basePath, serveFrontend)
+
 	rootGroup := r.Group(app.basePath)
 
-	serveFrontend := makeServeFrontend(app.basePath)
+	// роутинг фронтенда
 	apiPrefix := path.Join(app.basePath, "/folders/")
 	r.Use(func(ctx *gin.Context) {
 		if strings.HasPrefix(ctx.Request.URL.Path, apiPrefix) {
