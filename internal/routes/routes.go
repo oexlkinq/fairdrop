@@ -1,22 +1,18 @@
 package routes
 
 import (
-	"path"
-	"strings"
-
 	"github.com/gin-gonic/gin"
 	"github.com/oexlkinq/fairdrop/internal/db"
 	"github.com/oexlkinq/fairdrop/internal/storage"
 )
 
 type App struct {
-	db       *db.DB
-	storage  *storage.Storage
-	basePath string
+	db      *db.DB
+	storage *storage.Storage
 }
 
-func Create(db *db.DB, s *storage.Storage, basePath string) *App {
-	return &App{db, s, basePath}
+func Create(db *db.DB, s *storage.Storage) *App {
+	return &App{db, s}
 }
 
 func (app *App) Run() {
@@ -29,22 +25,7 @@ func (app *App) Run() {
 		ctx.Header("Access-Control-Allow-Origin", "*")
 	})
 
-	serveFrontend := makeServeFrontend(app.basePath)
-	r.GET(app.basePath, serveFrontend)
-
-	rootGroup := r.Group(app.basePath)
-
-	// роутинг фронтенда
-	apiPrefix := path.Join(app.basePath, "/folders/")
-	r.Use(func(ctx *gin.Context) {
-		if strings.HasPrefix(ctx.Request.URL.Path, apiPrefix) {
-			return
-		}
-
-		serveFrontend(ctx)
-	})
-
-	folders := rootGroup.Group("/folders")
+	folders := r.Group("/folders")
 	app.addFolderRoutes(folders)
 
 	r.Run()

@@ -1,15 +1,34 @@
 services:
-  fairdrop:
-    container_name: fairdrop
+  back:
     build:
       context: .
-      args:
-        - BASE_PATH=${BASE_PATH}
     environment:
       DATA_FOLDER_PATH: /data
       PORT: 8080
-      BASE_PATH: ${BASE_PATH}
-    ports:
-      - ${PORT}:8080
+    # ports:
+    #   - ${PORT}:8080
     volumes:
       - ${DATA_FOLDER_PATH}:/data
+    develop:
+      watch:
+        - path: .
+          include:
+            - '*.go'
+            - go.mod
+            - go.sum
+          action: rebuild
+    labels:
+      - traefik.http.routers.back.rule=PathPrefix(`/folders`)
+      - traefik.http.services.back.loadbalancer.server.port=8080
+
+  router:
+    image: traefik
+    command: --providers.docker --api.insecure=true --accesslog=true
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+include:
+  - frontend/docker-compose.yaml
