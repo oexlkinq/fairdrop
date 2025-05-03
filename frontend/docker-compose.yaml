@@ -11,6 +11,8 @@ x-front-base: &front
 services:
   front:
     <<: *front
+    profiles:
+      - main
     develop:
       watch:
         - path: .

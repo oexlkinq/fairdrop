@@ -21,7 +21,7 @@ RUN pnpm run build-only
 
 
 FROM base AS dev
-CMD [ "pnpm", "dev", "--port", "8080" ]
+CMD [ "pnpm", "dev", "--port", "8080", "--host" ]
 
 
 FROM nginx:alpine AS main
