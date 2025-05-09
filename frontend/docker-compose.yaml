@@ -31,6 +31,6 @@ services:
           action: sync
         - path: package.json
           target: /src/package.json
-          action: sync+exec
+          action: rebuild
           exec:
             command: pnpm i
