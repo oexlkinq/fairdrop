@@ -1,4 +1,4 @@
-FROM golang:alpine AS build
+FROM golang:1.24.3-alpine AS build
 WORKDIR /src
 
 RUN apk add gcc musl-dev

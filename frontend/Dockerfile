@@ -1,4 +1,4 @@
-FROM node:slim AS corepack
+FROM node:24.0.1-slim AS corepack
 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
@@ -24,6 +24,6 @@ FROM base AS dev
 CMD [ "pnpm", "dev", "--port", "8080", "--host" ]
 
 
-FROM nginx:alpine AS main
+FROM nginx:1.27.5-alpine3.21 AS main
 COPY --from=build /src/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/nginx.conf
