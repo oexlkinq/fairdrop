@@ -3,6 +3,8 @@ import api from '@/api';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
+const base = import.meta.env.BASE_URL
+
 const route = useRoute('/[[pw]]')
 const pw = ref(route.params.pw ?? '')
 
@@ -60,7 +62,7 @@ async function fetchFolder() {
 
   <ul class="list-group list-group-flush">
     <li class="list-group-item" v-for="file of files" :key="file">
-      <a :href="`./folders/${pw}/${file}`" target="_blank">{{ file }}</a>
+      <a :href="`${base}folders/${pw}/${file}`" download>{{ file }}</a>
     </li>
   </ul>
 </template>
