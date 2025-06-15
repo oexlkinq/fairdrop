@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import api from '@/api';
+import HomeBtn from '@/components/HomeBtn.vue';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -48,6 +49,8 @@ async function fetchFolder() {
 </script>
 
 <template>
+  <HomeBtn />
+
   <div class="input-group">
     <input type="text" class="form-control" placeholder="Пароль от папки" v-model="pw">
     <button class="btn btn-primary" @click="fetchFolder" :disabled="state === states.processing">Открыть</button>

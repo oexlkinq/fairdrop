@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useDark } from '@vueuse/core';
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView } from 'vue-router'
 
 useDark({
   selector: 'html',
@@ -13,15 +13,6 @@ useDark({
 <template>
   <main class="island">
     <div class="grid-vstack earth">
-      <uv class="nav nav-pills nav-justified mb-4">
-        <li class="nav-item">
-          <RouterLink class="nav-link" active-class="active" to="/upload">Создать</RouterLink>
-        </li>
-        <li class="nav-item">
-          <RouterLink class="nav-link" active-class="active" to="/open">Открыть</RouterLink>
-        </li>
-      </uv>
-
       <Suspense>
         <RouterView />
       </Suspense>
@@ -31,8 +22,8 @@ useDark({
 
 <style scoped>
 .earth {
-  width: 25rem;
-  min-height: 15rem;
+  width: 27rem;
+  min-height: 20rem;
   align-content: start;
 }
 </style>

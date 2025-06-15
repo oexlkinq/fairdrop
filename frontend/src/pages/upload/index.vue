@@ -1,24 +1,21 @@
 <script setup lang="ts">
 import api from '@/api';
+import CopyBox from '@/components/CopyBox.vue';
+import HomeBtn from '@/components/HomeBtn.vue';
 import { ref, useTemplateRef } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 
 const maxFormSize = 33554432
+
+const base = import.meta.env.BASE_URL
 
 const fileInput = useTemplateRef('files')
 const uploadState = ref({
   progress: 0,
   processing: false,
+  success: false,
+  password: '',
+  link: '',
 })
-
-const route = useRoute('/upload/[[pw]]')
-let pw = route.params.pw ?? ''
-if (pw === '') {
-  const { data: folder } = await api.foldersCreatePost()
-
-  pw = folder.password
-  useRouter().replace('/upload/' + pw)
-}
 
 async function submit() {
   if (uploadState.value.processing) {
@@ -51,21 +48,29 @@ async function submit() {
       return alert('too big files')
     }
 
-    await api.foldersFolderPost(pw, fileArray, {
+    const { data: folder } = await api.foldersPushPost(fileArray, {
       onUploadProgress(progressEvent) {
         uploadState.value.progress = progressEvent.progress ?? 0
       },
     })
+
+    uploadState.value.password = folder.password
+    uploadState.value.link = makeLink(folder.password)
+    uploadState.value.success = true
   } catch (e) {
     alert('error while uploading')
   } finally {
     uploadState.value.processing = false
   }
 }
+
+function makeLink(password: string) {
+  return `${location.origin}${base}open/${password}`
+}
 </script>
 
 <template>
-  <h3>{{ pw }}</h3>
+  <HomeBtn />
 
   <form class="grid-vstack" @submit.prevent="submit">
     <input type="hidden" name="MAX_FILE_SIZE" :value="maxFormSize">
@@ -75,6 +80,14 @@ async function submit() {
 
     <div class="progress" :aria-disabled="!uploadState.processing">
       <div class="progress-bar" :style="{ width: `${uploadState.progress * 100}%` }"></div>
+    </div>
+
+    <div v-show="uploadState.success">
+      <p>Файлы успешно загружены</p>
+      <p>
+        Пароль: <CopyBox>{{ uploadState.password }}</CopyBox><br>
+        Ссылка: <CopyBox>{{ uploadState.link }}</CopyBox>
+      </p>
     </div>
   </form>
 </template>
