@@ -13,7 +13,7 @@ services:
       watch:
         - path: .
           include:
-            - '*.go'
+            - '**/*.go'
             - go.mod
             - go.sum
           action: rebuild
