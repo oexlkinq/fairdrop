@@ -26,25 +26,25 @@ import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError, operationServerM
 /**
  * 
  * @export
- * @interface FoldersCreatePost200Response
+ * @interface Folder
  */
-export interface FoldersCreatePost200Response {
+export interface Folder {
     /**
      * 
      * @type {string}
-     * @memberof FoldersCreatePost200Response
+     * @memberof Folder
      */
     'password': string;
     /**
      * timestamp в формате unix-time в секундах
      * @type {number}
-     * @memberof FoldersCreatePost200Response
+     * @memberof Folder
      */
     'creation_date': number;
     /**
      * 
      * @type {string}
-     * @memberof FoldersCreatePost200Response
+     * @memberof Folder
      */
     'ip': string;
 }
@@ -238,6 +238,49 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * создаёт новую папку с полученными файлами и возвращает информацию о ней
+         * @summary аплоад файлов с созданием папки
+         * @param {Array<File>} files 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        foldersPushPost: async (files: Array<File>, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'files' is not null or undefined
+            assertParamExists('foldersPushPost', 'files', files)
+            const localVarPath = `/folders/push`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            if (files) {
+                files.forEach((element) => {
+                    localVarFormParams.append('files', element as any);
+                })
+            }
+
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -254,7 +297,7 @@ export const DefaultApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async foldersCreatePost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FoldersCreatePost200Response>> {
+        async foldersCreatePost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Folder>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.foldersCreatePost(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DefaultApi.foldersCreatePost']?.[localVarOperationServerIndex]?.url;
@@ -314,6 +357,19 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['DefaultApi.foldersFolderPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * создаёт новую папку с полученными файлами и возвращает информацию о ней
+         * @summary аплоад файлов с созданием папки
+         * @param {Array<File>} files 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async foldersPushPost(files: Array<File>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Folder>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.foldersPushPost(files, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DefaultApi.foldersPushPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -330,7 +386,7 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        foldersCreatePost(options?: RawAxiosRequestConfig): AxiosPromise<FoldersCreatePost200Response> {
+        foldersCreatePost(options?: RawAxiosRequestConfig): AxiosPromise<Folder> {
             return localVarFp.foldersCreatePost(options).then((request) => request(axios, basePath));
         },
         /**
@@ -374,6 +430,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
          */
         foldersFolderPost(folder: string, files: Array<File>, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.foldersFolderPost(folder, files, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * создаёт новую папку с полученными файлами и возвращает информацию о ней
+         * @summary аплоад файлов с созданием папки
+         * @param {Array<File>} files 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        foldersPushPost(files: Array<File>, options?: RawAxiosRequestConfig): AxiosPromise<Folder> {
+            return localVarFp.foldersPushPost(files, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -444,6 +510,18 @@ export class DefaultApi extends BaseAPI {
      */
     public foldersFolderPost(folder: string, files: Array<File>, options?: RawAxiosRequestConfig) {
         return DefaultApiFp(this.configuration).foldersFolderPost(folder, files, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * создаёт новую папку с полученными файлами и возвращает информацию о ней
+     * @summary аплоад файлов с созданием папки
+     * @param {Array<File>} files 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public foldersPushPost(files: Array<File>, options?: RawAxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).foldersPushPost(files, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

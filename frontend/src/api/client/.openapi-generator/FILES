@@ -4,5 +4,7 @@ api.ts
 base.ts
 common.ts
 configuration.ts
+docs/DefaultApi.md
+docs/Folder.md
 git_push.sh
 index.ts
