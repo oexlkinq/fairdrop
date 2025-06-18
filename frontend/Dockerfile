@@ -17,11 +17,14 @@ COPY . .
 
 
 FROM base AS build
-RUN pnpm run build-only
+ARG BASE_PATH
+RUN pnpm run build-only --base ${BASE_PATH}
 
 
 FROM base AS dev
-CMD [ "pnpm", "dev", "--port", "8080", "--host" ]
+ARG BASE_PATH
+ENV BASE_PATH=${BASE_PATH}
+CMD [ "sh", "-c", "pnpm dev --port 8080 --host --base ${BASE_PATH}" ]
 
 
 FROM nginx:alpine AS main

@@ -1,32 +1,36 @@
-x-front-base: &front
-  build:
-    context: .
-  environment:
-    - VITE_PUBLIC_BASE_PATH=${VITE_PUBLIC_BASE_PATH}
-  labels:
-    - traefik.http.routers.front.rule=PathPrefix(`/`)
-    - traefik.http.services.front.loadbalancer.server.port=8080
-
 services:
   front:
-    <<: *front
     profiles:
       - main
+    environment:
+      - VITE_PUBLIC_BASE_PATH=${VITE_PUBLIC_BASE_PATH}
     build:
+      context: .
       target: main
+      args:
+        BASE_PATH: ${BASE_PATH}
     develop:
       watch:
         - path: .
           action: rebuild
+    labels:
+      - traefik.http.routers.front.rule=PathPrefix(`/`)
+      - traefik.http.services.front.loadbalancer.server.port=8080
+      - traefik.http.middlewares.strip_base_path.stripprefix.prefixes=${BASE_PATH}
+      - traefik.http.routers.front.middlewares=strip_base_path@docker
 
   front_dev:
-    <<: *front
     ports:
       - 8080:8080
     profiles:
       - dev
     build:
+      context: .
       target: dev
+      args:
+        BASE_PATH: ${BASE_PATH}
+    environment:
+      - VITE_PUBLIC_BASE_PATH=${VITE_PUBLIC_BASE_PATH}
     develop:
       watch:
         - path: .
@@ -37,3 +41,6 @@ services:
           action: rebuild
           exec:
             command: pnpm i
+    labels:
+      - traefik.http.routers.front.rule=PathPrefix(`/`)
+      - traefik.http.services.front.loadbalancer.server.port=8080
