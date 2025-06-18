@@ -46,13 +46,22 @@ async function fetchFolder() {
     state = states.error
   }
 }
+
+function onInput(event: KeyboardEvent) {
+  if (event.key !== 'Enter') {
+    return
+  }
+
+  fetchFolder().catch(e => { throw e })
+}
+
 </script>
 
 <template>
   <HomeBtn />
 
   <div class="input-group">
-    <input type="text" class="form-control" placeholder="Пароль от папки" v-model="pw">
+    <input type="text" class="form-control" placeholder="Пароль от папки" v-model="pw" @keypress.passive="onInput">
     <button class="btn btn-primary" @click="fetchFolder" :disabled="state === states.processing">Открыть</button>
   </div>
 
