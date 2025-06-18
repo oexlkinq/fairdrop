@@ -25,8 +25,9 @@ services:
   router:
     image: traefik
     command: --providers.docker
+    # command: --providers.docker --accesslog=true --log.level=DEBUG
     ports:
-      - 80:80
+      - ${PORT}:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
