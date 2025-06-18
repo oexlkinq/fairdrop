@@ -1,20 +1,19 @@
 x-front-base: &front
   build:
     context: .
-    target: main
   environment:
     - VITE_PUBLIC_BASE_PATH=${VITE_PUBLIC_BASE_PATH}
   labels:
     - traefik.http.routers.front.rule=PathPrefix(`/`)
     - traefik.http.services.front.loadbalancer.server.port=8080
-  ports:
-    - 8080:8080
 
 services:
   front:
     <<: *front
     profiles:
       - main
+    build:
+      target: main
     develop:
       watch:
         - path: .
@@ -22,6 +21,8 @@ services:
 
   front_dev:
     <<: *front
+    ports:
+      - 8080:8080
     profiles:
       - dev
     build:
