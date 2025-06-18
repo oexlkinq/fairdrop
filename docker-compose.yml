@@ -16,7 +16,8 @@ services:
             - go.sum
           action: rebuild
     labels:
-      - traefik.http.routers.back.rule=PathPrefix(`/folders`)
+      - traefik.http.routers.back.rule=PathPrefix(`${BASE_PATH}/folders`)
+      - traefik.http.routers.back.middlewares=strip_base_path@docker
       - traefik.http.services.back.loadbalancer.server.port=8080
     cap_drop:
       - ALL
@@ -30,6 +31,8 @@ services:
       - ${PORT}:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - traefik.http.middlewares.strip_base_path.stripprefix.prefixes=${BASE_PATH}
 
 include:
   - frontend/docker-compose.yaml

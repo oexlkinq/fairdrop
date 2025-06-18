@@ -15,9 +15,8 @@ services:
           action: rebuild
     labels:
       - traefik.http.routers.front.rule=PathPrefix(`/`)
-      - traefik.http.services.front.loadbalancer.server.port=8080
-      - traefik.http.middlewares.strip_base_path.stripprefix.prefixes=${BASE_PATH}
       - traefik.http.routers.front.middlewares=strip_base_path@docker
+      - traefik.http.services.front.loadbalancer.server.port=8080
 
   front_dev:
     ports:
