@@ -55,6 +55,10 @@ function onInput(event: KeyboardEvent) {
   fetchFolder().catch(e => { throw e })
 }
 
+function makeLink(parts: string[]) {
+  return parts.map(part => part.replace(/\/+$/, '')).join('/')
+}
+
 </script>
 
 <template>
@@ -74,7 +78,7 @@ function onInput(event: KeyboardEvent) {
 
   <ul class="list-group list-group-flush">
     <li class="list-group-item" v-for="file of files" :key="file">
-      <a :href="`${base}folders/${pw}/${file}`" download>{{ file }}</a>
+      <a :href="makeLink([base, 'folders', pw, file])" download>{{ file }}</a>
     </li>
   </ul>
 </template>
