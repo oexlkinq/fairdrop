@@ -1,0 +1,7 @@
+{
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "Dockerfile": "Dockerfile, docker-compose.yml, .git*, *.env, .dockerignore",
+      "go.mod": "go.mod, go.sum"
+    }
+  }

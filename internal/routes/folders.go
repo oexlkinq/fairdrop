@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/oexlkinq/fairdrop/internal/db"
 	"github.com/oexlkinq/fairdrop/internal/utils"
 )
 
@@ -17,14 +18,21 @@ import (
 const maxBunchFilesUploadSize = 32 << 20
 
 func (app *App) addFolderRoutes(folders *gin.RouterGroup) {
-	folders.POST("/create", app.createFolder)
-	folders.GET("/:password", app.listFolder)
-	folders.POST("/:password", app.uploadFile)
-	folders.DELETE("/:password", app.deleteFolder)
-	folders.GET("/:password/:filename", app.serveFile)
+	folders.POST("/create", app.createFolderHandler)
+	folders.POST("/push", app.pushFilesHandler)
+	folders.GET("/:password", app.listFolderHandler)
+	folders.POST("/:password", app.uploadFilesHandler)
+	folders.DELETE("/:password", app.deleteFolderHandler)
+	folders.GET("/:password/:filename", app.serveFileHandler)
 }
 
-func (app *App) createFolder(c *gin.Context) {
+func (app *App) createFolderHandler(c *gin.Context) {
+	folder := app.createFolder(c)
+
+	c.JSON(http.StatusOK, folder)
+}
+
+func (app *App) createFolder(c *gin.Context) *db.Folder {
 	var pw string
 	for {
 		pw = utils.GeneratePassword()
@@ -36,16 +44,14 @@ func (app *App) createFolder(c *gin.Context) {
 
 	app.storage.CreateFolder(pw)
 
-	folder := app.db.CreateFolder(c, pw, c.ClientIP())
-
-	c.JSON(http.StatusOK, folder)
+	return app.db.CreateFolder(c, pw, c.ClientIP())
 }
 
 type FolderParams struct {
 	Password string `uri:"password" binding:"required"`
 }
 
-func (app *App) listFolder(c *gin.Context) {
+func (app *App) listFolderHandler(c *gin.Context) {
 	var params FolderParams
 
 	err := c.BindUri(&params)
@@ -69,7 +75,7 @@ type FileParams struct {
 	Filename string `uri:"filename" binding:"required"`
 }
 
-func (app *App) serveFile(c *gin.Context) {
+func (app *App) serveFileHandler(c *gin.Context) {
 	var params FileParams
 
 	err := c.BindUri(&params)
@@ -90,7 +96,8 @@ func (app *App) serveFile(c *gin.Context) {
 	c.File(fullpath)
 }
 
-func (app *App) uploadFile(c *gin.Context) {
+// аплоад файлов в существующую папку
+func (app *App) uploadFilesHandler(c *gin.Context) {
 	var params FolderParams
 
 	err := c.BindUri(&params)
@@ -98,21 +105,28 @@ func (app *App) uploadFile(c *gin.Context) {
 		return
 	}
 
+	// чекнуть есть ли папка в базе
 	if !app.db.TestFolder(c, params.Password) {
 		c.AbortWithStatus(http.StatusNotFound)
 		return
 	}
 
-	err = c.Request.ParseMultipartForm(maxBunchFilesUploadSize)
+	app.uploadFiles(c, params.Password)
+}
+
+func (app *App) uploadFiles(c *gin.Context, password string) {
+	// прочитать форму. может вернуть ошибку превышения размера
+	err := c.Request.ParseMultipartForm(maxBunchFilesUploadSize)
 	if err != nil {
 		log.Println(fmt.Errorf("upload file: parse multipart form: %w", err))
 		c.AbortWithStatus(http.StatusRequestEntityTooLarge)
 		return
 	}
 
+	// перебор файлов формы. здесь может быть несколько ключей потому что в форме ключи для файлов могут повторяться
 	files := c.Request.MultipartForm.File["files"]
 	for _, file := range files {
-		fullpath := filepath.Join(app.storage.Path, params.Password, path.Base(file.Filename))
+		fullpath := filepath.Join(app.storage.Path, password, path.Base(file.Filename))
 
 		err := c.SaveUploadedFile(file, fullpath)
 		if err != nil {
@@ -122,7 +136,15 @@ func (app *App) uploadFile(c *gin.Context) {
 	}
 }
 
-func (app *App) deleteFolder(c *gin.Context) {
+// аплоад с созданием папки
+func (app *App) pushFilesHandler(c *gin.Context) {
+	folder := app.createFolder(c)
+	app.uploadFiles(c, folder.Password)
+
+	c.JSON(http.StatusOK, folder)
+}
+
+func (app *App) deleteFolderHandler(c *gin.Context) {
 	var params FolderParams
 
 	err := c.BindUri(&params)

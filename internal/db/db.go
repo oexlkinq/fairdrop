@@ -58,6 +58,7 @@ func (db *DB) CreateFolder(c context.Context, pw string, ip string) *Folder {
 	return folder
 }
 
+// проверка существования папки в бд
 func (db *DB) TestFolder(c context.Context, pw string) bool {
 	var res bool
 

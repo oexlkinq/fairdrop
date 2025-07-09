@@ -1,8 +1,7 @@
 package routes
 
 import (
-	"path"
-	"strings"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/oexlkinq/fairdrop/internal/db"
@@ -10,37 +9,30 @@ import (
 )
 
 type App struct {
-	db       *db.DB
-	storage  *storage.Storage
-	basePath string
+	db      *db.DB
+	storage *storage.Storage
 }
 
-func Create(db *db.DB, s *storage.Storage, basePath string) *App {
-	return &App{db, s, basePath}
+func Create(db *db.DB, s *storage.Storage) *App {
+	return &App{db, s}
 }
 
 func (app *App) Run() {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 
+	// для CORS
 	r.Use(func(ctx *gin.Context) {
 		// #2 TODO: сменить * на домен или пару доменов
 		ctx.Header("Access-Control-Allow-Origin", "*")
-	})
 
-	rootGroup := r.Group(app.basePath)
-
-	serveFrontend := makeServeFrontend(app.basePath)
-	apiPrefix := path.Join(app.basePath, "/folders/")
-	r.Use(func(ctx *gin.Context) {
-		if strings.HasPrefix(ctx.Request.URL.Path, apiPrefix) {
-			return
+		// #2 TODO: заглушка для CORS preflight. как то бы это покрасивше разруливать
+		if ctx.Request.Method == http.MethodOptions {
+			ctx.AbortWithStatus(http.StatusOK)
 		}
-
-		serveFrontend(ctx)
 	})
 
-	folders := rootGroup.Group("/folders")
+	folders := r.Group("/folders")
 	app.addFolderRoutes(folders)
 
 	r.Run()

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import api from '@/api';
+import HomeBtn from '@/components/HomeBtn.vue';
 import { ref } from 'vue';
 import { useRoute } from 'vue-router';
+
+const base = import.meta.env.BASE_URL
 
 const route = useRoute('/[[pw]]')
 const pw = ref(route.params.pw ?? '')
@@ -43,11 +46,26 @@ async function fetchFolder() {
     state = states.error
   }
 }
+
+function onInput(event: KeyboardEvent) {
+  if (event.key !== 'Enter') {
+    return
+  }
+
+  fetchFolder().catch(e => { throw e })
+}
+
+function makeLink(parts: string[]) {
+  return parts.map(part => part.replace(/\/+$/, '')).join('/')
+}
+
 </script>
 
 <template>
+  <HomeBtn />
+
   <div class="input-group">
-    <input type="text" class="form-control" placeholder="Пароль от папки" v-model="pw">
+    <input type="text" class="form-control" placeholder="Пароль от папки" v-model="pw" @keypress.passive="onInput">
     <button class="btn btn-primary" @click="fetchFolder" :disabled="state === states.processing">Открыть</button>
   </div>
 
@@ -60,7 +78,7 @@ async function fetchFolder() {
 
   <ul class="list-group list-group-flush">
     <li class="list-group-item" v-for="file of files" :key="file">
-      <a :href="`./folders/${pw}/${file}`" target="_blank">{{ file }}</a>
+      <a :href="makeLink([base, 'folders', pw, file])" download>{{ file }}</a>
     </li>
   </ul>
 </template>

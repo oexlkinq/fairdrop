@@ -2,6 +2,7 @@ openapi: 3.1.1
 info:
   title: fairdrop api
   version: 1.1.2
+# #1 TODO: вроде как здесь вместо хоста можно использовать переменную. чтобы не хардкодить мой адрес
 servers:
   - url: https://plck.ru/fairdrop
 paths:
@@ -15,23 +16,38 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - password
-                  - creation_date
-                  - ip
-                properties:
-                  password:
-                    $ref: '#/components/schemas/password'
-                  creation_date:
-                    type: integer
-                    format: int32
-                    description: timestamp в формате unix-time в секундах
-                  ip:
-                    type: string
-                    format: ipv4
+                $ref: "#/components/schemas/folder"
         "5XX":
           description: внутренняя ошибка сервера
+  /folders/push:
+    post:
+      summary: аплоад файлов с созданием папки
+      description: создаёт новую папку с полученными файлами и возвращает информацию о ней
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/folder"
+        '413':
+          description: объем данных в форме превышает лимит
+        "5XX":
+          description: внутренняя ошибка сервера
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
   /folders/{folder}:
     parameters:
       - $ref: '#/components/parameters/pwParam'
@@ -129,3 +145,19 @@ components:
       type: string
       minLength: 1
       maxLength: 256
+    folder:
+      type: object
+      required:
+        - password
+        - creation_date
+        - ip
+      properties:
+        password:
+          $ref: '#/components/schemas/password'
+        creation_date:
+          type: integer
+          format: int32
+          description: timestamp в формате unix-time в секундах
+        ip:
+          type: string
+          format: ipv4
