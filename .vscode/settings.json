@@ -1,7 +1,10 @@
 {
-    "explorer.fileNesting.enabled": true,
-    "explorer.fileNesting.patterns": {
-      "Dockerfile": "Dockerfile, docker-compose.yml, .git*, *.env, .dockerignore",
-      "go.mod": "go.mod, go.sum"
-    }
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "tsconfig.json": "tsconfig.*.json, env.d.ts",
+    "vite.config.ts": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*, typed-router.d.ts",
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .oxlint*, oxlint*, .prettier*, prettier*, .editorconfig",
+    "Dockerfile": "Dockerfile, docker-compose.yaml, .git*, *.env, .dockerignore, nginx.conf",
+    "go.mod": "go.mod, go.sum"
   }
+}
